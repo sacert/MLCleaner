@@ -8,7 +8,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-FOLDER='Primary'					# mail folder
+FOLDER='inbox'							# mail folder
 LOGIN=''							# email address
 PASSWORD=''							# password
 
@@ -16,7 +16,7 @@ email_list = [] # don't actually need this/ can actually just check if 'not send
 email_subs = [] # contain list of tuples with data for mailing lists
 
 print 'Setting up servers...'
-server = smtplib.SMTP('smtp.gmail.com', 587)	# need to alter if not using gmail
+server = smtplib.SMTP('smtp.gmail.com', 587)		# need to alter if not using gmail
 mail = imaplib.IMAP4_SSL('imap.gmail.com')		# need to alter if not using gmail
 
 def log_in():
@@ -29,7 +29,7 @@ def log_in():
 	# log in to see mail
 	print 'Logging into IMAP...'
 	mail.login(LOGIN, PASSWORD)
-	mail.select()
+	mail.select(FOLDER)
 
 def get_subs():
 	print 'Retrieving subscriptions...'
