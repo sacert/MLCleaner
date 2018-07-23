@@ -2,7 +2,9 @@
 
 import imaplib
 import sys
+import datetime
 import email
+import logging
 import re
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -11,6 +13,15 @@ from email.mime.text import MIMEText
 FOLDER='inbox'							# mail folder
 LOGIN=''							# email address
 PASSWORD=''							# password
+
+# support for logging unsubscribe efforts
+LOG_FILENAME='mlc.log'
+log_p = True
+logging.basicConfig(filename=LOG_FILENAME,filemode='a')
+if log_p:
+        logging.getLogger().setLevel(logging.INFO)
+else:
+        logging.getLogger().setLevel(logging.WARNING)
 
 email_list = [] # don't actually need this/ can actually just check if 'not sender_address in email_subs'
 email_subs = [] # contain list of tuples with data for mailing lists
@@ -95,6 +106,7 @@ def send_mailto(sub):
 	msg['Subject'] = subject
 	message = ''
 	msg.attach(MIMEText(message))
+        logging.info('%s\n%s\n%s\n%s',datetime.datetime.today(),LOGIN, to, msg.as_string())
 	server.sendmail(LOGIN, to, msg.as_string())
 
 # unsubscribe from a specific mailing list(s)
