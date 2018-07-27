@@ -2,7 +2,9 @@
 
 import imaplib
 import sys
+import datetime
 import email
+import logging
 import re
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -11,6 +13,15 @@ from email.mime.text import MIMEText
 FOLDER='inbox'							# mail folder
 LOGIN=''							# email address
 PASSWORD=''							# password
+
+# support for logging unsubscribe efforts
+LOG_FILENAME='mlc.log'
+log_p = True
+logging.basicConfig(filename=LOG_FILENAME,filemode='a')
+if log_p:
+        logging.getLogger().setLevel(logging.INFO)
+else:
+        logging.getLogger().setLevel(logging.WARNING)
 
 email_list = [] # don't actually need this/ can actually just check if 'not sender_address in email_subs'
 email_subs = [] # contain list of tuples with data for mailing lists
@@ -95,10 +106,11 @@ def send_mailto(sub):
 	msg['Subject'] = subject
 	message = ''
 	msg.attach(MIMEText(message))
+        logging.info('%s\n%s\n%s\n%s',datetime.datetime.today(),LOGIN, to, msg.as_string())
 	server.sendmail(LOGIN, to, msg.as_string())
 
 # unsubscribe from a specific mailing list(s)
-def unsub_num(nums):
+def unsub_num(nums,delete_p):
 
 	# check if user entered a number
 	try:
@@ -109,7 +121,7 @@ def unsub_num(nums):
 	for num in nums:
 		print 'Removing: ' + email_subs[int(num)][0]
 		send_mailto(email_subs[int(num)])
-		if 'del' in user_input:
+                if delete_p:
 			delete_email(email_subs[int(num)])
 	for num in nums:
 		email_list.remove(email_subs[int(num)][1])
@@ -138,9 +150,10 @@ def main_loop():
 		elif user_input == '-unsub all del':
 			unsub_all(True)
 		elif '-unsub' in user_input:
-			ui = user_input.split("-unsub",1)[1].replace(" ", "").replace("del", "")
+			delete_p = re.search('\s*del\s*$',"-unsub 1,2,3,4 del")
+                        ui = user_input.split("-unsub",1)[1].replace(" ", "").replace("del", "")
 			nums = re.search('(.*)', ui).group(1).split(",")
-			unsub_num(nums)
+			unsub_num(nums,delete_p)
 		elif user_input == '-options':
 			print_options()
 		elif user_input == '-exit':
